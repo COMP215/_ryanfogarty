@@ -76,7 +76,6 @@ void Graph::addToGraph(string nodeName, string newConnection)
             temp = &theGraph[i];
             if (nodeName == temp->Name)
             {
-                cout << "nodeName == temp->name" << endl;
                 Node* newNode = new Node;
                 newNode->Name = newConnection;
                 temp->friends.push_back(*newNode);
@@ -118,32 +117,39 @@ void Graph::printGraph()
 }
 bool Graph::isBipartite()
 {
-    bool doneChecking = false;
-    int checkCount = 0;
-    int x = 0;
+
+    int x, y;
+    x=0;
+
     for (int i = 0; i<theGraph.size();i++)
     {
-        while (x<theGraph[i].friends.size() && doneChecking == false)
+        y=0;
+        int checkCount = 0;
+        while (checkCount != numberOfVertices )
         {
-            checkCount++;
-            if (theGraph[i].Name == theGraph[i].friends[x].Name)
+            if (theGraph[i].Name == theGraph[x].friends[y].Name)
             {
+                cout << theGraph[i].Name << " and  " << theGraph[x].friends[y].Name << endl;
                 return false;
-                cout << "yeep" << endl;
+            }
+
+            else{
+
+                //nada
+            }
+            if(y == theGraph[x].friends.size()-1)
+            {
+                x++;
+                y = -1;
             }
             else{
-                cout << theGraph[i].Name << " , " << theGraph[i].friends[x].Name << endl;
-                cout << "naap" << endl;
+                //nada
             }
-            if (checkCount == numberOfVertices)
-            {
-                doneChecking == true;
-            }
-            else if(checkCount == theGraph[i].friends.size())
-            {
-                i++;
-            }
+            checkCount++;
+            y++;
+
         }
+        x = 0;
     }
     return true;
 }
@@ -151,43 +157,24 @@ bool Graph::isBipartite()
 
 int main()
 {
-    /*
-    Node firstNode;
-    Node secondNode, thirdNode;
-    firstNode.Name = "Steve";
-    secondNode.Name = "Ryan";
-    thirdNode.Name = "jim";
-    //Graph myConnections;
 
-    firstNode.addConnection(&secondNode);
-    firstNode.addConnection(&thirdNode);
-    secondNode.addConnection(&thirdNode);
-    thirdNode.addConnection(&firstNode);
-    thirdNode.addConnection(&secondNode);
-    if (firstNode.areFriends(&secondNode))
-    {
-        //cout << "connected" << endl;
-    };
-    if (secondNode.areFriends(&thirdNode))
-    {
-        //cout << "another one" << endl;
-    }
     Graph newGraph;
-    newGraph.addToGraph(&firstNode);
-    newGraph.addToGraph(&secondNode);
-    newGraph.addToGraph(&thirdNode);
-    newGraph.printGraph();
-    */
-    Graph newGraph;
-    newGraph.addToGraph("1","2");
-    newGraph.addToGraph("1","3");
+    newGraph.addToGraph("1","11");
+    newGraph.addToGraph("1","10");
     newGraph.addToGraph("2","6");
     newGraph.addToGraph("2","8");
     newGraph.addToGraph("3","9");
     newGraph.addToGraph("1","8");
     cout << "graph size " << newGraph.theGraph.size() << endl;
     newGraph.printGraph();
-    newGraph.isBipartite();
-    //cout << newGraph.theGraph.size();
+    if (newGraph.isBipartite())
+    {
+
+        cout << "Its bipartite" << endl;
+    }
+    else{
+        cout << "naa mang" << endl;
+    }
+
 
 }
