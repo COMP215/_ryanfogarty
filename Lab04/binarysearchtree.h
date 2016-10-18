@@ -24,11 +24,13 @@ public:
     bool Insert(std::string);
     bool Search(std::string);
     bool Delete(std::string);
+    void InOrder();
 
 private:
     Node* root_;
     Node* WhereInTree;
     bool RecursiveSearch(Node* root_, std::string name );
+    void InOrder(Node* root);
 };
 
 

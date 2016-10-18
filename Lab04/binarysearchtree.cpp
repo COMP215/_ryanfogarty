@@ -62,11 +62,11 @@ bool BinarySearchTree::Search(string name)
 {
     if(RecursiveSearch(this->root_,name) == true)
     {
-        cout << "found: " << name << endl;
+        //cout << "found: " << name << endl;
         return true;
     }
     else{
-        cout << "could not find: " << name << endl;
+        //cout << "could not find: " << name << endl;
         return false;
     }
 }
@@ -93,6 +93,21 @@ bool BinarySearchTree::RecursiveSearch(Node* root_, const string name)
 
          }
       }
+}
+void BinarySearchTree::InOrder()
+{
+    InOrder(this->root_);
+}
+void BinarySearchTree::InOrder(Node* root_)
+{
+    if(root_->left_ != NULL){
+        InOrder(root_->left_);
+    }
+    cout << root_->data_ << endl;
+    if (root_->right_ != NULL){
+        InOrder(root_->right_);
+    }
+
 }
 
 bool BinarySearchTree::Delete(string name)
