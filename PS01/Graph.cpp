@@ -18,7 +18,7 @@ public:
     vector<Node> friends;
     void addConnection(Node* newConnection);
     bool areFriends(Node* node);
-    int connectionStrength;
+    int weight;
     Node* parentNode;
     bool checked;
     string MSTname;
@@ -50,7 +50,7 @@ class Graph{
 public:
     Graph();
     vector<Node> theGraph;
-    void addToGraph(string nodeName, string newConnection, int connectionStrength);
+    void addToGraph(string nodeName, string newConnection, int weight);
     void printGraph();
     bool isBipartite();
     void createGraphDot();
@@ -58,6 +58,23 @@ public:
     int numberOfVertices;
     void KruskalMST();
     vector<Node> minimumTree;
+private:
+    struct makeGraph
+    {
+        string vertex;
+        vector <string> edges;
+        vector <int> weight;
+    };
+    struct graphSort
+    {
+        string vertex;
+        string edge;
+        int weight;
+
+        bool operator() (graphSort i,graphSort j) { return (i.weight<j.weight);}
+    }sortPlease;
+    vector <makeGraph> to_be_sorted;
+    vector <graphSort> sortThis;
 
 };
 
@@ -67,7 +84,7 @@ Graph::Graph()
     numberOfVertices = 0;
 }
 
-void Graph::addToGraph(string nodeName, string newConnection, int connectionStrength)
+void Graph::addToGraph(string nodeName, string newConnection, int weight)
 {
     numberOfVertices++;
     if (theGraph.size() == 0)
@@ -76,12 +93,12 @@ void Graph::addToGraph(string nodeName, string newConnection, int connectionStre
         Node* connectionNode = new Node;
         newNode->Name = nodeName;
         connectionNode->Name = newConnection;
-        connectionNode->connectionStrength = connectionStrength;
+        connectionNode->weight = weight;
         connectionNode->parentNode = newNode;
         newNode->friends.push_back(*connectionNode);
         theGraph.push_back(*newNode);
         connectionNode->friends.push_back(*newNode);
-        cout << connectionNode->friends.size() << " " << endl;
+        //cout << connectionNode->friends.size() << " " << endl;
         cout << "initial push" << endl;
     }
     else{
@@ -93,11 +110,11 @@ void Graph::addToGraph(string nodeName, string newConnection, int connectionStre
             {
                 Node* newNode = new Node;
                 newNode->Name = newConnection;
-                newNode->connectionStrength = connectionStrength;
+                newNode->weight = weight;
                 newNode->parentNode = temp;
                 temp->friends.push_back(*newNode);
                 newNode->friends.push_back(*temp);
-                cout << " " << newNode->friends.size() << endl;
+                //cout << " " << newNode->friends.size() << endl;
                 return;
             }
             else if (i==theGraph.size()-1){
@@ -105,16 +122,17 @@ void Graph::addToGraph(string nodeName, string newConnection, int connectionStre
                     Node* connectionNode = new Node;
                     newNode->Name = nodeName;
                     connectionNode->Name = newConnection;
-                    connectionNode->connectionStrength = connectionStrength;
+                    connectionNode->weight = weight;
                     connectionNode->parentNode = newNode;
                     newNode->friends.push_back(*connectionNode);
                     connectionNode->friends.push_back(*newNode);
-                    cout << "  " << connectionNode->friends.size() << endl;
+                    //cout << "  " << connectionNode->friends.size() << endl;
                     theGraph.push_back(*newNode);
                     return;
             }
             else{
                 //nothing
+
             }
         }
     }
@@ -193,7 +211,7 @@ void Graph::createGraphDot()
             Node tempNode;
             tempNode = temp.friends[i];
 
-            myfile << "\"" << temp.Name << "\"" <<  " -- " << "\"" << tempNode.Name << "\"" << " [label=" << tempNode.connectionStrength << "]" << endl;
+            myfile << "\"" << temp.Name << "\"" <<  " -- " << "\"" << tempNode.Name << "\"" << " [label=" << tempNode.weight << "]" << endl;
             //myfile.close();
             //cout << temp.Name << " -> " << tempNode.Name << endl;
 
@@ -204,44 +222,74 @@ void Graph::createGraphDot()
 
 void Graph::minimumSpanningTree()
 {
+    /*This is Kruskals algorithm*/
+
     for(int i=0; i<theGraph.size(); ++i){
+        makeGraph graph;
         Node temp;
         temp = theGraph[i];
         Node lowestWeight = temp.friends[0];
-        //cout << " " << temp.Name << endl;
+        graph.vertex = temp.Name;
         for(int i=0; i<temp.friends.size();i++)
         {
             Node currentVertice;
             currentVertice = temp.friends[i];
-            //cout << currentVertice.friends.size() << "Fish" << endl;
-            for(int i = 0; i<currentVertice.friends.size(); i++)
-            {
-                cout << currentVertice.connectionStrength << " < " << lowestWeight.connectionStrength << endl;
-
-                if (currentVertice.connectionStrength < lowestWeight.connectionStrength  )
-                {
-                    lowestWeight = temp.friends[i];
-                    //temp.friends[i].checked = true;
-
-                    //cout << lowestWeight.connectionStrength << endl;
-                }
-                else
-                {
-                    //nada
-                }
-
-                //cout << " " << currentVertice.friends[i].connectionStrength << endl;
-            }
-            Node* addToMST = new Node;
-            addToMST->Name = temp.Name;
-            addToMST->MSTname = lowestWeight.Name;
-            minimumTree.push_back(*addToMST);
-
+            graph.edges.push_back(currentVertice.Name);
+            graph.weight.push_back(currentVertice.weight);
+        }
+        to_be_sorted.push_back(graph);
+    }
+    for (int i=0; i<to_be_sorted.size();i++)
+    {
+        makeGraph currentVertex = to_be_sorted[i];
+        for (int i=0;i<currentVertex.edges.size();i++)
+        {
+            graphSort aConnectionStruct;
+            //cout << "edge: " << currentVertex.edges[i] << " weight: " << currentVertex.weight[i] << endl;
+            aConnectionStruct.vertex = currentVertex.vertex;
+            aConnectionStruct.edge = currentVertex.edges[i];
+            aConnectionStruct.weight = currentVertex.weight[i];
+            sortThis.push_back(aConnectionStruct);
         }
 
-
-
     }
+    sort(sortThis.begin(),sortThis.end(),sortPlease);
+    for (int i =0;i<to_be_sorted.size(); i++)
+    {
+        makeGraph currentVertex = to_be_sorted[i];
+        for(int i=0;i<currentVertex.edges.size();i++)
+        {
+            string edge = currentVertex.edges[i];
+            for (int i=0; i<to_be_sorted.size();i++)
+            {
+                if (to_be_sorted[i].vertex == edge)
+                {
+                    makeGraph currentVertex2 = to_be_sorted[i];
+                    for (int i = 0; i<currentVertex.edges.size();i++)
+                    {
+                        string currentEdge = currentVertex.edges[i];
+                        for(int i = 0; i<currentVertex2.edges.size();i++)
+                        {
+                            if (currentVertex2.edges[i] == currentEdge)
+                            {
+                                for(int i = 0; i<sortThis.size();i++)
+                                {
+                                    if (sortThis[i].vertex == currentVertex.vertex && sortThis[i].edge == currentVertex2.vertex)
+                                    {
+                                        sortThis.erase(sortThis.begin()+i);
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+
+
+                }
+            }
+        }
+    }
+
 
 
 }
@@ -252,10 +300,11 @@ void Graph::KruskalMST()
     minimumSpanningTree();
     ofstream myfile ( "minimumSpanningTree.txt");
     myfile << "Graph G{" << endl;
-    for(int i=0;i<minimumTree.size();i++)
+    for(int i=0;i<sortThis.size();i++)
     {
-        myfile << "\"" << minimumTree[i].Name << "\"" <<  " -- " << "\"" << minimumTree[i].MSTname << "\""   << endl;
+        myfile << "\"" << sortThis[i].vertex << "\"" <<  " -- " << "\"" << sortThis[i].edge << "\""   << endl;
     }
+    myfile << "}";
 }
 int main()
 {
@@ -268,6 +317,7 @@ int main()
     newGraph.addToGraph("3","9",1);
     newGraph.addToGraph("1","8",0);
     newGraph.addToGraph("10","8",8);
+    newGraph.addToGraph("1","2",18);
     cout << "graph size " << newGraph.theGraph.size() << endl;
     newGraph.printGraph();
     if (newGraph.isBipartite())
