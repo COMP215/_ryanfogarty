@@ -57,6 +57,8 @@ public:
     void minimumSpanningTree();
     int numberOfVertices;
     void KruskalMST();
+    void PrimMST();
+    void PrimMST2();
     vector<Node> minimumTree;
 private:
     struct makeGraph
@@ -75,6 +77,7 @@ private:
     }sortPlease;
     vector <makeGraph> to_be_sorted;
     vector <graphSort> sortThis;
+    vector <graphSort> PrimVec;
 
 };
 
@@ -256,14 +259,17 @@ void Graph::minimumSpanningTree()
     sort(sortThis.begin(),sortThis.end(),sortPlease);
     for (int i =0;i<to_be_sorted.size(); i++)
     {
+
         makeGraph currentVertex = to_be_sorted[i];
         for(int i=0;i<currentVertex.edges.size();i++)
         {
             string edge = currentVertex.edges[i];
+
             for (int i=0; i<to_be_sorted.size();i++)
             {
                 if (to_be_sorted[i].vertex == edge)
                 {
+
                     makeGraph currentVertex2 = to_be_sorted[i];
                     for (int i = 0; i<currentVertex.edges.size();i++)
                     {
@@ -272,12 +278,13 @@ void Graph::minimumSpanningTree()
                         {
                             if (currentVertex2.edges[i] == currentEdge)
                             {
-                                for(int i = 0; i<sortThis.size();i++)
+                                 for(int i = 0; i<sortThis.size();i++)
                                 {
                                     if (sortThis[i].vertex == currentVertex.vertex && sortThis[i].edge == currentVertex2.vertex)
                                     {
                                         sortThis.erase(sortThis.begin()+i);
                                     }
+
                                 }
                             }
 
@@ -294,7 +301,6 @@ void Graph::minimumSpanningTree()
 
 }
 
-
 void Graph::KruskalMST()
 {
     minimumSpanningTree();
@@ -303,6 +309,97 @@ void Graph::KruskalMST()
     for(int i=0;i<sortThis.size();i++)
     {
         myfile << "\"" << sortThis[i].vertex << "\"" <<  " -- " << "\"" << sortThis[i].edge << "\""   << endl;
+    }
+    myfile << "}";
+    sortThis.clear();
+}
+
+void Graph::PrimMST2()
+{
+
+    for(int i=0; i<theGraph.size(); i++){
+        makeGraph graph;
+        Node temp;
+        temp = theGraph[i];
+        for(int x=0; x<temp.friends.size();x++)
+        {
+            graphSort aConnectionStruct;
+            //cout << "edge: " << currentVertex.edges[i] << " weight: " << currentVertex.weight[i] << endl;
+            aConnectionStruct.vertex = theGraph[i].Name;
+            aConnectionStruct.edge = temp.friends[x].Name;
+            aConnectionStruct.weight = temp.friends[x].weight;
+
+            sortThis.push_back(aConnectionStruct);
+        }
+    }
+    string previous_vertex = "";
+    sort(sortThis.begin(),sortThis.end(),sortPlease);
+    for (int i=0; i<sortThis.size();i++)
+    {
+        if (sortThis[i].vertex == previous_vertex)
+        {
+            previous_vertex = sortThis[i].vertex;
+            continue;
+        }
+        else
+        {
+            //numberOfVertex++;
+            previous_vertex = sortThis[i].vertex;
+            graphSort temp = sortThis[i];
+            PrimVec.push_back(temp);
+            sortThis.erase(sortThis.begin()+i);
+        }
+    }
+
+
+    vector <string> alreadyVistedEdges;
+    for (int i=0; i<PrimVec.size();i++)
+    {
+        alreadyVistedEdges.push_back(PrimVec[i].edge);
+        alreadyVistedEdges.push_back(PrimVec[i].vertex);
+    }
+    for (int i=0; i<sortThis.size();i++)
+    {
+        string temp = sortThis[i].edge;
+        string temp2 = sortThis[i].vertex;
+
+        bool alreadyVisted = false;
+        cout << "alreadyvisted edges ::" << alreadyVistedEdges.size() << endl;
+        cout << temp << "  ;;;;  " << temp2 << endl;
+        for(int x=0;x<alreadyVistedEdges.size();x++)
+        {
+            if (temp == alreadyVistedEdges[x]){
+                    //cout << "TRUUUU" << endl;
+
+                for (int z=0;z<alreadyVistedEdges.size(); z++){
+                    if (temp2 == alreadyVistedEdges[z])
+                    {
+                        //cout << "true" << endl;
+                        alreadyVisted = true;
+                        continue;
+                    }
+                }
+            }
+
+        }
+
+        if (alreadyVisted == false)
+        {
+            PrimVec.push_back(sortThis[i]);
+            alreadyVistedEdges.push_back(sortThis[i].edge);
+            alreadyVistedEdges.push_back(sortThis[i].vertex);
+        }
+        else
+        {
+            //
+        }
+    }
+
+    ofstream myfile ( "PrimsAlg.txt");
+    myfile << "Graph G{" << endl;
+    for(int i=0;i<sortThis.size();i++)
+    {
+        myfile << "\"" << PrimVec[i].vertex << "\"" <<  " -- " << "\"" << PrimVec[i].edge << "\""   << endl;
     }
     myfile << "}";
 }
@@ -316,10 +413,11 @@ int main()
     newGraph.addToGraph("2","8",3);
     newGraph.addToGraph("3","9",1);
     newGraph.addToGraph("1","8",0);
-    newGraph.addToGraph("10","8",8);
-    newGraph.addToGraph("1","2",18);
+    newGraph.addToGraph("1","2",3);
+    newGraph.addToGraph("10","6",10);
     cout << "graph size " << newGraph.theGraph.size() << endl;
     newGraph.printGraph();
+    //newGraph.PrimMST();
     if (newGraph.isBipartite())
     {
 
@@ -330,6 +428,7 @@ int main()
     }
     newGraph.createGraphDot();
     newGraph.KruskalMST();
+    newGraph.PrimMST2();
 
     return 0;
 }
