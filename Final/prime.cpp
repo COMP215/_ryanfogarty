@@ -27,11 +27,10 @@ void printPrimes(int n)
         multiple = primes[multipleTracker];
         for(int i=0;i<primes.size();i++)
         {
-            cout << primes[i] << endl;
             if((primes[i]% multiple) == 0)
             {
-                atLeastOnce = true;
                 if(primes[i]!=multiple){
+                    atLeastOnce = true;
                     primes.erase(primes.begin()+i);
                     i--;
                 }
